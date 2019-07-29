@@ -43,7 +43,10 @@ HANDLE g_hReadProcThread;
 BOOL OnProcessOutput(ClientState* state)
 {
 	if (state == NULL)
+	{
 		ErrorExit(_T("null state pointer"));
+		return FALSE;
+	}
 
 	if (!state->bRunning)
 		return FALSE;
@@ -74,7 +77,8 @@ BOOL OnSocketOutput(ClientState* state)
 
 	while (dwTotalWritten < state->dwSockRead)
 	{
-		bSuccess = WriteFile(state->hProcWrite, state->chSockBuff, state->dwSockRead, &dwWrite, NULL);
+		bSuccess = WriteFile(state->hProcWrite, state->chSockBuff + dwTotalWritten, state->dwSockRead - dwTotalWritten,
+		                     &dwWrite, NULL);
 		if (!bSuccess)
 		{
 			shutdown(state->client, SD_BOTH);
@@ -92,7 +96,8 @@ BOOL OnSocketOutput(ClientState* state)
 	{
 		while (dwTotalWritten < state->dwSockRead)
 		{
-			bSuccess = WriteFile(hStdOut, state->chSockBuff, state->dwSockRead, &dwWrite, NULL);
+			bSuccess = WriteFile(hStdOut, state->chSockBuff + dwTotalWritten, state->dwSockRead - dwTotalWritten,
+			                     &dwWrite, NULL);
 			if (!bSuccess)break;
 			dwTotalWritten += dwWrite;
 		}
